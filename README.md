@@ -36,7 +36,7 @@ Maven as build tool
 
 ▶️ How to Run
 1. Clone the repo:<br>
-   git clone https://github.com/your-username/java-assessment-.git<br>
+   git clone https://github.com/nazaina/java-assessment-.git<br>
    cd java-assessment-
 
 2. Configure PostgreSQL in application.properties (or application.yml):<br>
