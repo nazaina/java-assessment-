@@ -178,13 +178,13 @@ public class CustomerController {
     @DeleteMapping("/{id}")
     public Mono<ResponseEntity<BaseResponse<Object>>> deleteCustomer (@PathVariable UUID id) {
         return customerService.delete(id) // returns Mono<Customer>
-                .map(customer -> {
+                .then(Mono.defer(() -> {
                     BaseResponse<Object> baseResponse = new BaseResponse<>();
                     baseResponse.setCode(HttpStatus.OK.value());
                     baseResponse.setMessage("Customer deleted successfully");
                     baseResponse.setData(null);
-                    return ResponseEntity.ok(baseResponse);
-                })
+                    return Mono.just(ResponseEntity.ok(baseResponse));
+                }))
                 .onErrorResume(throwable -> {
                     BaseResponse<Object> baseResponse = new BaseResponse<>();
                     baseResponse.setCode(2000);
