@@ -2,12 +2,17 @@ server.port=8080
 
 spring.application.name=java-assessment
 
-spring.datasource.url=jdbc:postgresql://localhost:5432/assessment
-spring.datasource.username=YOUR_USERNAME
-spring.datasource.password=YOUR_PASSWORD
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=true
-spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+spring.r2dbc.url=r2dbc:postgresql://localhost:5432/customerdb
+spring.r2dbc.username=YOUR_USERNAME
+spring.r2dbc.password=YOUR_PASSWORD
+spring.sql.init.mode=always
+spring.sql.init.platform=postgres
+spring.sql.init.schema-locations=classpath:db/schema.sql
+
+# Connection pool (optional, needs dependency io.r2dbc:r2dbc-pool)
+spring.r2dbc.pool.enabled=true
+spring.r2dbc.pool.initial-size=5
+spring.r2dbc.pool.max-size=20
 
 
 # Logging

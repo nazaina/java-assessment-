@@ -1,24 +1,18 @@
-📚 Customer & Product Management API
+📚 Customer & Product Management API (Reactive)
 
-This project is a Spring Boot 3.3.x REST API for managing Customers and Products.
-It demonstrates proper use of Spring MVC, PostgreSQL integration, Swagger for API documentation, logging with Logback, and basic error handling.
+This project is a Spring Boot 3.3.x Reactive REST API for managing Customers and Products.
+It demonstrates the use of Spring WebFlux, PostgreSQL R2DBC integration, Swagger/OpenAPI for documentation, reactive error handling, and logging with Logback.
 
 🚀 Features
 
-✅ CRUD APIs for Customers and Products
-
-✅ RESTful JSON standard (GET, POST, PUT, DELETE)
-
-✅ PostgreSQL database integration
-
-✅ Swagger UI for API documentation & testing
-
-✅ Centralized error handling & validation
-
-✅ Logging with Logback
-
-✅ Unit Tests (JUnit + Spring Boot Test)
-
+✅ CRUD APIs for Customers and Products<br>
+✅ Reactive & Non-Blocking (Spring WebFlux + Project Reactor)<br>
+✅ RESTful JSON standard (GET, POST, PUT, DELETE)<br>
+✅ PostgreSQL R2DBC database integration<br>
+✅ Swagger UI for API documentation & testing<br>
+✅ Centralized error handling & validation (reactive)<br>
+✅ Logging with Logback<br>
+✅ Unit Tests with JUnit 5 & WebTestClient
 
 🛠️ Tech Stack
 
@@ -26,7 +20,9 @@ Java 17 (OpenJDK)
 
 Spring Boot 3.3.x (LTS)
 
-Spring Data JPA (Hibernate)
+Spring WebFlux
+
+Spring Data R2DBC
 
 PostgreSQL
 
@@ -34,48 +30,43 @@ Springdoc OpenAPI (Swagger UI)
 
 Logback for logging
 
-JUnit 5 for testing
+JUnit 5 + WebTestClient for testing
 
 Maven as build tool
 
-
 ▶️ How to Run
+1. Clone the repo:
+   git clone https://github.com/your-username/java-assessment-.git
+   cd java-assessment-
 
-Clone the repo:
+2. Configure PostgreSQL in application.properties (or application.yml):
+   spring.r2dbc.url=r2dbc:postgresql://localhost:5432/customerdb
+   spring.r2dbc.username=yourusername
+   spring.r2dbc.password=yourpassword
 
-git clone https://github.com/your-username/java-assessment-.git <br>
-cd java-assessment-
+# schema.sql for table creation
+spring.sql.init.mode=always
+spring.sql.init.schema-locations=classpath:schema.sql
 
+3. Build & run:
+   mvn clean install
+   mvn spring-boot:run
 
-Configure PostgreSQL in application.properties:
+4. Access API:
 
-spring.datasource.url=jdbc:postgresql://localhost:5432/customerdb
-spring.datasource.username=yourusername
-spring.datasource.password=yourpassword
-spring.jpa.hibernate.ddl-auto=update
-
-
-Build & run:
-
-mvn clean install<br>
-mvn spring-boot:run
-
-
-Access API:
-
-Swagger UI → http://localhost:8080/swagger-ui/index.html
-
+Swagger UI → http://localhost:8080/swagger-ui.html
 
 📝 Logging
 
-All API requests and responses are logged with Logback.
+All API requests and responses are logged with Logback
 
-Logs can be found in logs/app.log.
+Logs are stored in: logs/app.log
 
 ✅ Testing
 
-Run unit tests:
+Run unit tests with:
 
 mvn test
 
 
+Uses JUnit 5 and Spring WebFlux WebTestClient for reactive endpoint testing.
