@@ -2,8 +2,13 @@ package com.example.java.assessment.controller;
 
 
 import com.example.java.assessment.config.BaseResponse;
-import com.example.java.assessment.entity.Customer;
+import com.example.java.assessment.dto.CustomerDto;
+import com.example.java.assessment.dto.CustomerResponseDto;
 import com.example.java.assessment.service.CustomerService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,8 +27,21 @@ public class CustomerController {
         this.customerService = customerService;
     }
 
+    @Operation(
+            summary = "Create a new customer",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Customer created successfully",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = CustomerResponseDto.class)
+                            )
+                    )
+            }
+    )
     @PostMapping
-    public Mono<ResponseEntity<BaseResponse<Object>>> addCustomer(@RequestBody Customer customer) {
+    public Mono<ResponseEntity<BaseResponse<Object>>> addCustomer(@RequestBody CustomerDto customer) {
 
         return customerService.create(customer)
                 .map(data -> {
@@ -44,6 +62,19 @@ public class CustomerController {
 
     }
 
+    @Operation(
+            summary = "Get all products",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Product list retrieved successfully",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = CustomerResponseDto.class)
+                            )
+                    )
+            }
+    )
     @GetMapping
     public Mono<ResponseEntity<BaseResponse<Object>>> getAllCustomers() {
         return customerService.getAll()
@@ -66,6 +97,19 @@ public class CustomerController {
                 });
     }
 
+    @Operation(
+            summary = "Get customer by id",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Customer retrieved successfully",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = CustomerResponseDto.class)
+                            )
+                    )
+            }
+    )
     @GetMapping("/{id}")
     public Mono<ResponseEntity<BaseResponse<Object>>> getCustomerById(@PathVariable UUID id) {
         return customerService.findById(id) // returns Mono<Customer>
@@ -84,8 +128,21 @@ public class CustomerController {
                 });
     }
 
+    @Operation(
+            summary = "Update Customer By ID",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Customer updated successfully",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = CustomerResponseDto.class)
+                            )
+                    )
+            }
+    )
     @PutMapping("/{id}")
-    public Mono<ResponseEntity<BaseResponse<Object>>> updateCustomer (@PathVariable UUID id, @RequestBody Customer customer) {
+    public Mono<ResponseEntity<BaseResponse<Object>>> updateCustomer (@PathVariable UUID id, @RequestBody CustomerDto customer) {
 
         return customerService.update(id,customer)
                 .map(data -> {
@@ -105,6 +162,19 @@ public class CustomerController {
 
     }
 
+    @Operation(
+            summary = "Delete customer",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Customer deleted successfully",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = CustomerResponseDto.class)
+                            )
+                    )
+            }
+    )
     @DeleteMapping("/{id}")
     public Mono<ResponseEntity<BaseResponse<Object>>> deleteCustomer (@PathVariable UUID id) {
         return customerService.delete(id) // returns Mono<Customer>

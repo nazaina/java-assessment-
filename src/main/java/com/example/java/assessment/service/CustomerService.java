@@ -1,6 +1,7 @@
 package com.example.java.assessment.service;
 
 import com.example.java.assessment.config.ResourceNotFoundException;
+import com.example.java.assessment.dto.CustomerDto;
 import com.example.java.assessment.entity.Customer;
 import com.example.java.assessment.repository.CustomerRepository;
 import org.springframework.stereotype.Service;
@@ -19,12 +20,18 @@ public class CustomerService {
         this.customerRepository = customerRepository;
     }
 
-    public Mono<Customer> create(Customer customer) {
+    public Mono<Customer> create(CustomerDto request) {
 
+        Customer customer = new Customer();
+        customer.setFirstName(request.getFirstName());
+        customer.setLastName(request.getLastName());
+        customer.setEmail(request.getEmail());
+        customer.setAddress(request.getAddress());
+        customer.setPhoneNo(request.getPhoneNo());
         return customerRepository.insert(customer);
     }
 
-    public Mono<Customer> update(UUID id, Customer c) {
+    public Mono<Customer> update(UUID id, CustomerDto c) {
         return customerRepository.findById(id)
                 .switchIfEmpty(Mono.error(new ResourceNotFoundException("Customer not found")))
                 .flatMap(exist -> {

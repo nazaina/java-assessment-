@@ -1,6 +1,7 @@
 package com.example.java.assessment.service;
 
 import com.example.java.assessment.config.ResourceNotFoundException;
+import com.example.java.assessment.dto.ProductDto;
 import com.example.java.assessment.entity.Product;
 import com.example.java.assessment.repository.ProductRepository;
 import org.springframework.stereotype.Service;
@@ -19,12 +20,15 @@ public class ProductService {
         this.productRepository = productRepository;
     }
 
-    public Mono<Product> create(Product product){
-
+    public Mono<Product> create(ProductDto request){
+        Product product = new Product();
+        product.setBookTitle(request.getBookTitle());
+        product.setBookPrice(request.getBookPrice());
+        product.setBookQuantity(request.getBookQuantity());
         return productRepository.insert(product);
     }
 
-    public Mono<Product> update(UUID id, Product c){
+    public Mono<Product> update(UUID id, ProductDto c){
 
         return productRepository.findById(id)
                 .switchIfEmpty(Mono.error(new ResourceNotFoundException("Product not found")))
