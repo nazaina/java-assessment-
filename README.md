@@ -43,8 +43,8 @@ Maven as build tool
 
 Clone the repo:
 
-git clone https://github.com/your-username/customer-product-api.git
-cd customer-product-api
+git clone https://github.com/your-username/java-assessment-.git <br>
+cd java-assessment-
 
 
 Configure PostgreSQL in application.properties:
@@ -64,8 +64,6 @@ mvn spring-boot:run
 Access API:
 
 Swagger UI → http://localhost:8080/swagger-ui/index.html
-
-API Docs (JSON) → http://localhost:8080/v3/api-docs
 
 
 📝 Logging
