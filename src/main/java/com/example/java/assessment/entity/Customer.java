@@ -1,29 +1,26 @@
 package com.example.java.assessment.entity;
 
-import jakarta.persistence.*;
+
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.GenericGenerator;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
 
 import java.util.UUID;
 
-@Entity
+
 @Getter
 @Setter
+@Table("customers")
 public class Customer {
 
     @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(
-            name = "UUID",
-            strategy = "org.hibernate.id.UUIDGenerator"
-    )
     private UUID id;
     private String firstName;
     private String lastName;
     private String email;
     private String address;
     private String phoneNo;
-    private String familyMembers;
+//    private String familyMembers;
 
 }

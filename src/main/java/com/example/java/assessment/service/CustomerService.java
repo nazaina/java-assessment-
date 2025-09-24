@@ -4,6 +4,8 @@ import com.example.java.assessment.config.ResourceNotFoundException;
 import com.example.java.assessment.entity.Customer;
 import com.example.java.assessment.repository.CustomerRepository;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.UUID;
@@ -17,34 +19,37 @@ public class CustomerService {
         this.customerRepository = customerRepository;
     }
 
-    public Customer create(Customer c){
-        return customerRepository.save(c);
+    public Mono<Customer> create(Customer customer) {
+
+        return customerRepository.insert(customer);
     }
 
-    public Customer update(UUID id, Customer c){
-        return customerRepository.findById(id).map(exist -> {
-            exist.setFirstName(c.getFirstName());
-            exist.setLastName(c.getLastName());
-            exist.setEmail(c.getEmail());
-            exist.setAddress(c.getAddress());
-            exist.setPhoneNo(c.getPhoneNo());
-
-            return customerRepository.save(exist);
-        }).orElseThrow(()-> new ResourceNotFoundException("Customer not found"));
+    public Mono<Customer> update(UUID id, Customer c) {
+        return customerRepository.findById(id)
+                .switchIfEmpty(Mono.error(new ResourceNotFoundException("Customer not found")))
+                .flatMap(exist -> {
+                    exist.setFirstName(c.getFirstName());
+                    exist.setLastName(c.getLastName());
+                    exist.setEmail(c.getEmail());
+                    exist.setAddress(c.getAddress());
+                    exist.setPhoneNo(c.getPhoneNo());
+                    return customerRepository.save(exist);
+                });
     }
 
-    public List<Customer> getAll(){
+    public Flux<Customer> getAll(){
         return customerRepository.findAll();
     }
 
-    public Customer findById(UUID id){
-        return customerRepository.findById(id).orElseThrow(()-> new ResourceNotFoundException("Customer not found"));
+    public Mono<Customer> findById(UUID id){
+        return customerRepository.findById(id)
+                .switchIfEmpty(Mono.error(new ResourceNotFoundException("Customer not found")));
     }
 
-    public void delete(UUID id) {
+    public Mono<Void> delete(UUID id) {
 
-        Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
-        customerRepository.delete(customer);
+        return customerRepository.findById(id)
+                .switchIfEmpty(Mono.error(new ResourceNotFoundException("Customer not found")))
+                .flatMap(customerRepository::delete);
     }
 }

@@ -7,6 +7,7 @@ import com.example.java.assessment.service.CustomerService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.UUID;
@@ -22,63 +23,105 @@ public class CustomerController {
     }
 
     @PostMapping
-    public ResponseEntity<BaseResponse<Customer>> addCustomer(@RequestBody Customer customer) {
-        Customer customerSaved = customerService.create(customer);
-        BaseResponse<Customer> response = new BaseResponse<>(
-                HttpStatus.CREATED.value(),
-                "Customer created successfully",
-                customerSaved
-        );
+    public Mono<ResponseEntity<BaseResponse<Object>>> addCustomer(@RequestBody Customer customer) {
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return customerService.create(customer)
+                .map(data -> {
+                    BaseResponse<Object> baseResponse = new BaseResponse<>();
+                    baseResponse.setCode(HttpStatus.CREATED.value());
+                    baseResponse.setMessage("Customer created successfully");
+                    baseResponse.setData(data);
+                    return ResponseEntity.ok(baseResponse);
+                })
+                .onErrorResume(throwable -> {
+                    BaseResponse<Object> baseResponse = new BaseResponse<>();
+                    baseResponse.setCode(2000);
+                    baseResponse.setData(throwable.getMessage());
+                    return Mono.just(ResponseEntity.badRequest().body(baseResponse));
+                });
+
+
+
     }
 
     @GetMapping
-    public ResponseEntity<BaseResponse<List<Customer>>> getAllCustomers() {
-        List<Customer> customers = customerService.getAll();
-        BaseResponse<List<Customer>> response = new BaseResponse<>(
-                HttpStatus.OK.value(),
-                "Customer list retrieved successfully",
-                customers
-        );
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+    public Mono<ResponseEntity<BaseResponse<Object>>> getAllCustomers() {
+        return customerService.getAll()
+                .collectList()
+                .map(customers -> {
+                    BaseResponse<Object> baseResponse = new BaseResponse<>();
+                    baseResponse.setCode(HttpStatus.OK.value());
+                    baseResponse.setMessage("Customer list retrieved successfully");
+                    baseResponse.setData(customers);
+
+                    return ResponseEntity.ok(baseResponse);
+                })
+                .onErrorResume(throwable -> {
+                    BaseResponse<Object> baseResponse = new BaseResponse<>();
+                    baseResponse.setCode(2000);
+                    baseResponse.setMessage(throwable.getMessage());
+                    baseResponse.setData(null);
+
+                    return Mono.just(ResponseEntity.internalServerError().body(baseResponse));
+                });
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<BaseResponse<Customer>> getCustomerById(@PathVariable UUID id) {
-        Customer customer = customerService.findById(id);
-
-        BaseResponse<Customer> response = new BaseResponse<>(
-                HttpStatus.CREATED.value(),
-                "Customer retrieved successfully",
-                customer
-        );
-
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+    public Mono<ResponseEntity<BaseResponse<Object>>> getCustomerById(@PathVariable UUID id) {
+        return customerService.findById(id) // returns Mono<Customer>
+                .map(customer -> {
+                    BaseResponse<Object> baseResponse = new BaseResponse<>();
+                    baseResponse.setCode(HttpStatus.OK.value());
+                    baseResponse.setMessage("Customer retrieved successfully");
+                    baseResponse.setData(customer);
+                    return ResponseEntity.ok(baseResponse);
+                })
+                .onErrorResume(throwable -> {
+                    BaseResponse<Object> baseResponse = new BaseResponse<>();
+                    baseResponse.setCode(2000);
+                    baseResponse.setData(throwable.getMessage());
+                    return Mono.just(ResponseEntity.badRequest().body(baseResponse));
+                });
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<BaseResponse<Customer>> updateCustomer (@PathVariable UUID id, @RequestBody Customer customer) {
+    public Mono<ResponseEntity<BaseResponse<Object>>> updateCustomer (@PathVariable UUID id, @RequestBody Customer customer) {
 
-        Customer updated = customerService.update(id, customer);
-        BaseResponse<Customer> response = new BaseResponse<>(
-                HttpStatus.CREATED.value(),
-                "Customer updated successfully",
-                updated
-        );
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return customerService.update(id,customer)
+                .map(data -> {
+                    BaseResponse<Object> baseResponse = new BaseResponse<>();
+                    baseResponse.setCode(HttpStatus.OK.value());
+                    baseResponse.setMessage("Customer updated successfully");
+                    baseResponse.setData(data);
+                    return ResponseEntity.ok(baseResponse);
+                })
+                .onErrorResume(throwable -> {
+                    BaseResponse<Object> baseResponse = new BaseResponse<>();
+                    baseResponse.setCode(2000);
+                    baseResponse.setData(throwable.getMessage());
+                    return Mono.just(ResponseEntity.badRequest().body(baseResponse));
+                });
+
 
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<BaseResponse<Customer>> deleteCustomer (@PathVariable UUID id) {
-        customerService.delete(id);
-        BaseResponse<Customer> response = new BaseResponse<>(
-                HttpStatus.OK.value(),
-                "Customer delete successfully",
-                null
-        );
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+    public Mono<ResponseEntity<BaseResponse<Object>>> deleteCustomer (@PathVariable UUID id) {
+        return customerService.delete(id) // returns Mono<Customer>
+                .map(customer -> {
+                    BaseResponse<Object> baseResponse = new BaseResponse<>();
+                    baseResponse.setCode(HttpStatus.OK.value());
+                    baseResponse.setMessage("Customer deleted successfully");
+                    baseResponse.setData(null);
+                    return ResponseEntity.ok(baseResponse);
+                })
+                .onErrorResume(throwable -> {
+                    BaseResponse<Object> baseResponse = new BaseResponse<>();
+                    baseResponse.setCode(2000);
+                    baseResponse.setData(throwable.getMessage());
+                    return Mono.just(ResponseEntity.badRequest().body(baseResponse));
+                });
+
 
     }
 }

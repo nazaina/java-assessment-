@@ -8,6 +8,7 @@ import com.example.java.assessment.service.ProductService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.UUID;
@@ -23,63 +24,102 @@ public class ProductController {
     }
 
     @PostMapping
-    public ResponseEntity<BaseResponse<Product>> addProduct(@RequestBody Product product) {
-        Product productSaved = productService.create(product);
-        BaseResponse<Product> response = new BaseResponse<>(
-                HttpStatus.CREATED.value(),
-                "Product created successfully",
-                productSaved
-        );
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    public Mono<ResponseEntity<BaseResponse<Object>>> addProduct(@RequestBody Product product) {
+        return productService.create(product)
+                .map(data -> {
+                    BaseResponse<Object> baseResponse = new BaseResponse<>();
+                    baseResponse.setCode(HttpStatus.CREATED.value());
+                    baseResponse.setMessage("Product created successfully");
+                    baseResponse.setData(data);
+                    return ResponseEntity.ok(baseResponse);
+                })
+                .onErrorResume(throwable -> {
+                    BaseResponse<Object> baseResponse = new BaseResponse<>();
+                    baseResponse.setCode(2000);
+                    baseResponse.setData(throwable.getMessage());
+                    return Mono.just(ResponseEntity.badRequest().body(baseResponse));
+                });
+
     }
 
     @GetMapping
-    public ResponseEntity<BaseResponse<List<Product>>> getAllProducts() {
-        List<Product> products = productService.getAll();
-        BaseResponse<List<Product>> response = new BaseResponse<>(
-                HttpStatus.OK.value(),
-                "Product retrieved successfully",
-                products
-        );
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+    public Mono<ResponseEntity<BaseResponse<Object>>> getAllProducts() {
+        return productService.getAll()
+                .collectList()
+                .map(products -> {
+                    BaseResponse<Object> baseResponse = new BaseResponse<>();
+                    baseResponse.setCode(HttpStatus.OK.value());
+                    baseResponse.setMessage("Product list retrieved successfully");
+                    baseResponse.setData(products);
+
+                    return ResponseEntity.ok(baseResponse);
+                })
+                .onErrorResume(throwable -> {
+                    BaseResponse<Object> baseResponse = new BaseResponse<>();
+                    baseResponse.setCode(2000);
+                    baseResponse.setMessage(throwable.getMessage());
+                    baseResponse.setData(null);
+
+                    return Mono.just(ResponseEntity.internalServerError().body(baseResponse));
+                });
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<BaseResponse<Product>> getProductById(@PathVariable UUID id) {
-        Product product = productService.findById(id);
-        BaseResponse<Product> response = new BaseResponse<>(
-                HttpStatus.CREATED.value(),
-                "Product retrieved successfully",
-                product
-        );
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+    public Mono<ResponseEntity<BaseResponse<Object>>> getProductById(@PathVariable UUID id) {
+        return productService.findById(id) // returns Mono<Customer>
+                .map(product -> {
+                    BaseResponse<Object> baseResponse = new BaseResponse<>();
+                    baseResponse.setCode(HttpStatus.OK.value());
+                    baseResponse.setMessage("Product retrieved successfully");
+                    baseResponse.setData(product);
+                    return ResponseEntity.ok(baseResponse);
+                })
+                .onErrorResume(throwable -> {
+                    BaseResponse<Object> baseResponse = new BaseResponse<>();
+                    baseResponse.setCode(2000);
+                    baseResponse.setData(throwable.getMessage());
+                    return Mono.just(ResponseEntity.badRequest().body(baseResponse));
+                });
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<BaseResponse<Product>> updateProduct (@PathVariable UUID id, @RequestBody Product product) {
+    public Mono<ResponseEntity<BaseResponse<Object>>> updateProduct (@PathVariable UUID id, @RequestBody Product product) {
 
-        Product updated = productService.update(id, product);
-
-        BaseResponse<Product> response = new BaseResponse<>(
-                HttpStatus.CREATED.value(),
-                "Product updated successfully",
-                updated
-        );
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return productService.update(id,product)
+                .map(data -> {
+                    BaseResponse<Object> baseResponse = new BaseResponse<>();
+                    baseResponse.setCode(HttpStatus.OK.value());
+                    baseResponse.setMessage("Product updated successfully");
+                    baseResponse.setData(data);
+                    return ResponseEntity.ok(baseResponse);
+                })
+                .onErrorResume(throwable -> {
+                    BaseResponse<Object> baseResponse = new BaseResponse<>();
+                    baseResponse.setCode(2000);
+                    baseResponse.setData(throwable.getMessage());
+                    return Mono.just(ResponseEntity.badRequest().body(baseResponse));
+                });
 
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<BaseResponse<Product>> deleteProduct(@PathVariable UUID id) {
+    public Mono<ResponseEntity<BaseResponse<Object>>> deleteProduct(@PathVariable UUID id) {
 
-         productService.delete(id);
+        return productService.delete(id) // returns Mono<Customer>
+                .map(customer -> {
+                    BaseResponse<Object> baseResponse = new BaseResponse<>();
+                    baseResponse.setCode(HttpStatus.OK.value());
+                    baseResponse.setMessage("Product deleted successfully");
+                    baseResponse.setData(null);
+                    return ResponseEntity.ok(baseResponse);
+                })
+                .onErrorResume(throwable -> {
+                    BaseResponse<Object> baseResponse = new BaseResponse<>();
+                    baseResponse.setCode(2000);
+                    baseResponse.setData(throwable.getMessage());
+                    return Mono.just(ResponseEntity.badRequest().body(baseResponse));
+                });
 
-        BaseResponse<Product> response = new BaseResponse<>(
-                HttpStatus.OK.value(),
-                "Product deleted successfully",
-                null
-        );
-        return ResponseEntity.status(HttpStatus.OK).body(response);
 
     }
 }

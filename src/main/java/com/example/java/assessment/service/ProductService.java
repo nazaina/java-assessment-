@@ -4,6 +4,8 @@ import com.example.java.assessment.config.ResourceNotFoundException;
 import com.example.java.assessment.entity.Product;
 import com.example.java.assessment.repository.ProductRepository;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.UUID;
@@ -17,32 +19,36 @@ public class ProductService {
         this.productRepository = productRepository;
     }
 
-    public Product create(Product c){
-        return productRepository.save(c);
+    public Mono<Product> create(Product product){
+
+        return productRepository.insert(product);
     }
 
-    public Product update(UUID id, Product c){
-        return productRepository.findById(id).map(exist -> {
-           exist.setBookTitle(c.getBookTitle());
-           exist.setBookPrice(c.getBookPrice());
-           exist.setBookQuantity(c.getBookQuantity());
+    public Mono<Product> update(UUID id, Product c){
 
-            return productRepository.save(exist);
-        }).orElseThrow(()-> new ResourceNotFoundException("Product not found"));
+        return productRepository.findById(id)
+                .switchIfEmpty(Mono.error(new ResourceNotFoundException("Product not found")))
+                .flatMap(exist -> {
+                    exist.setBookTitle(c.getBookTitle());
+                    exist.setBookPrice(c.getBookPrice());
+                    exist.setBookQuantity(c.getBookQuantity());
+                    return productRepository.save(exist);
+                });
     }
 
-    public List<Product> getAll(){
+    public Flux<Product> getAll(){
         return productRepository.findAll();
     }
 
-    public Product findById(UUID id){
-        return productRepository.findById(id).orElseThrow(()-> new ResourceNotFoundException("Product not found"));
+    public Mono<Product> findById(UUID id){
+        return productRepository.findById(id)
+                .switchIfEmpty(Mono.error(new ResourceNotFoundException("Product not found")));
     }
 
-    public void delete(UUID id){
-        if (!productRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Product not found with id " + id);
-        }
-        productRepository.deleteById(id);
+    public Mono<Void> delete(UUID id){
+        return productRepository.findById(id)
+                .switchIfEmpty(Mono.error(new ResourceNotFoundException("Product not found")))
+                .flatMap(productRepository::delete);
     }
+
 }
